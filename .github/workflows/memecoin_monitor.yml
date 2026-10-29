@@ -1,1 +1,38 @@
+name: Memecoin Monitor
 
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run monitor (single cycle)
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python3 memecoin_monitor.py
+
+      - name: Commit updated state
+        run: |
+          git config user.name "memecoin-monitor-bot"
+          git config user.email "actions@github.com"
+          git add monitor_state.json
+          git diff --cached --quiet || git commit -m "Update monitor state [skip ci]"
+          git push
