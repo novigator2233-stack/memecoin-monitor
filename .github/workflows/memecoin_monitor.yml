@@ -31,7 +31,8 @@ jobs:
 
       - name: Commit updated state
         run: |
-          git config user.name "memecoin-monitor-bot"
-          git config user.email "actions@github.com"
+          git config user.name memecoin-monitor-bot
+          git config user.email actions@github.com
           git add monitor_state.json
-          git diff --cached --quiet ||
+          git diff --cached --quiet || git commit -m update-state
+          git push
